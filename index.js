@@ -11,8 +11,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/visit-count', (req, res) => {
-  let oldCookie = req.cookies.count;
-  if (!oldCookie) oldCookie = 0;
+  let oldValue = req.cookies.count;
+  if (typeof oldValue === undefined) oldCookie = 0;
   res.cookie("count", oldValue++).send();
 });
 
