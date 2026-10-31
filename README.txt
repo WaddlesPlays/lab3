@@ -1,5 +1,2 @@
-GitLab URL:
-Live Render URL... I was unable to get render working since it seems to require 
-a publicly accessible Git repo (and only seems to work with GitHub, GitLab, and 
-Bitbucket, for whatever reason), a screenshot of a local test will be attached
-to this submission
+Source URL: https://github.com/WaddlesPlays/lab3/tree/lab3-real
+Live Render URL: https://lab3-5d9w.onrender.com/
