@@ -13,7 +13,8 @@ app.get('/', (req, res) => {
 app.get('/visit-count', (req, res) => {
   let oldValue = req.cookies.count;
   if (typeof oldValue === undefined) oldCookie = 0;
-  res.cookie("count", oldValue++).send();
+  res.cookie("count", oldValue + 1).send();
+  res.send(oldValue + 1);
 });
 
 app.listen(port, () => {
