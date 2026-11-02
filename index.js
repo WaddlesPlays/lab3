@@ -26,7 +26,7 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   // log request
-  console.log(`[${new Temporal.PlainTime().toString()}] Incoming ${req.method} request to ${req.url}`);
+  console.log(`[${new Temporal.PlainTime().toString()}] Incoming ${req.method} request to ${req.url}:\n  ${req.body}`);
   next();
 });
 
@@ -60,13 +60,12 @@ app.post("/api/items", (req, res) => {
   if (
     typeof req.body.name !== String ||
     typeof req.body.platforms !== String ||
-    (req.body.hasOwnProperty("completion") && typeof req.body.completion !== Number) ||
+    (req.body.hasOwnProperty("id") && typeof req.body.id !== Number) ||
     (req.body.hasOwnProperty("completion") && typeof req.body.completion !== String) ||
-    (req.body.hasOwnProperty("score") && typeof req.body.score !== Number) ||
+    (req.body.hasOwnProperty("score") && typeof req.body.score !== Number)
   ) {
     throw new Error("gameFieldTypeMismatch");
   }
-
 
   let newGame = {
     id: req.body.id || readGames().length, // idk if this works
@@ -97,13 +96,24 @@ app.delete("/api/items/:id", (req, res) => {
 app.use((err, req, res, next) => {
   // handle errors
   switch (err.text) {
-    case "":
-      console.log(`An unhandled exception has occured of type ${err}`);
-      res.status(500).send({ error: "An unhandled exception has occured!" });
+    case "failedToFindGame":
+      const msg = `Game with ID ${req.id} couldn't be found!`;
+      console.error(msg);
+      res.status(400).send({ error: msg });
+      break;
+    case "gameReqFieldMissing":
+      const msg = `Request missing one of the following properties: name, platforms`;
+      console.error(msg);
+      res.status(400).send({ error: msg });
+      break;
+    case "gameFieldTypeMismatch":
+      const msg = `Request contains type errors`;
+      console.error(msg);
+      res.status(400).send({ error: msg });
       break;
     default:
-      console.log(err.text);
-      res.status(400).send({ error: `${err.text}` })
+      console.error(`An unhandled exception has occured of type ${err}`);
+      res.status(500).send({ error: "An unhandled exception has occured!" });
   }
 });
 
