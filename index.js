@@ -26,17 +26,17 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   // log request
-  console.log(`[${new Temporal.PlainTime().toString()}] Incoming ${req.method} request to ${req.url}:\n  ${req.body}`);
+  console.log(`[${new Temporal.PlainTime().toString()}] Incoming ${req.method} request to ${req.url}`);
   next();
 });
 
-app.get("/api/items", (req, res) => {
+app.get("/api/games", (req, res) => {
   // return all items
   const games = readGames();
   res.send(games);
 });
 
-app.get("/api/items/:id", (req, res) => {
+app.get("/api/games/:id", (req, res) => {
   // return the item with the game name
   const games = readGames();
   for (game of games) {
@@ -48,7 +48,7 @@ app.get("/api/items/:id", (req, res) => {
   throw new Error("failedToFindGame");
 });
 
-app.post("/api/items", (req, res) => {
+app.post("/api/games", (req, res) => {
   // add an item
   if (
     !req.body.hasOwnProperty("name") ||
@@ -79,7 +79,7 @@ app.post("/api/items", (req, res) => {
   res.send({ message: "Game successfully added" });
 });
 
-app.delete("/api/items/:id", (req, res) => {
+app.delete("/api/games/:id", (req, res) => {
   // delete an item
   const games = readGames();
   for (game of games) {
@@ -95,7 +95,7 @@ app.delete("/api/items/:id", (req, res) => {
 // error handling
 app.use((err, req, res, next) => {
   // handle errors
-  switch (err.text) {
+  switch (err.message) {
     case "failedToFindGame": {
       const msg = `Game with ID ${req.id} couldn't be found!`;
       console.error(msg);
@@ -127,7 +127,7 @@ app.listen(port, () => {
 // util functions //
 
 function readGames() {
-  return fs.readFileSync("data.json");
+  return JSON.parse(fs.readFileSync("data.json"));
 }
 
 function writeGame(game) {
