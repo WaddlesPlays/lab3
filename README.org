@@ -2,6 +2,13 @@
 
 my lab 3 for CSCI3172, please remember to delete the GitHub later
 
+* Usage
+
+`curl -X GET -H "Accept: application/json" localhost:3000/api/games/` will return the full JSON database from the server
+`curl -X GET -H "Accept: application/json" localhost:3000/api/games/{id}` will return the game with the specified ID
+`curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" --data "{json}" http://localhost:3000/api/games` will commit a new game to the server
+`curl -X DELETE -H "Accept: application/json" localhost:3000/api/games/{id}` will delete the game with the specified ID
+
 * Requirements
 
 - [x] initialize a project

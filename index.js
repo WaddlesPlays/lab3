@@ -26,18 +26,16 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   // log request
-  console.log(`[${new Temporal.PlainTime().toString()}] Incoming ${req.method} request to ${req.url}`);
+  console.log(`[${Temporal.Now.plainTimeISO()}] Incoming ${req.method} request to ${req.url}`);
   next();
 });
 
 app.get("/api/games", (req, res) => {
-  // return all items
   const games = readGames();
   res.send(games);
 });
 
 app.get("/api/games/:id", (req, res) => {
-  // return the item with the game name
   const games = readGames();
   for (game of games) {
     if (game.id == req.params.id) {
@@ -49,7 +47,7 @@ app.get("/api/games/:id", (req, res) => {
 });
 
 app.post("/api/games", (req, res) => {
-  // add an item
+  // ensure required fields are present
   if (
     !req.body.hasOwnProperty("name") ||
     !req.body.hasOwnProperty("platforms")
@@ -57,18 +55,23 @@ app.post("/api/games", (req, res) => {
     throw new Error("gameReqFieldMissing");
   }
 
+  // check for type mismatching
   if (
-    typeof req.body.name !== String ||
-    typeof req.body.platforms !== String ||
-    (req.body.hasOwnProperty("id") && typeof req.body.id !== Number) ||
-    (req.body.hasOwnProperty("completion") && typeof req.body.completion !== String) ||
-    (req.body.hasOwnProperty("score") && typeof req.body.score !== Number)
+    typeof req.body.name !== "string" || // whyyy does typeof return a string this lang sucks
+    typeof req.body.platforms !== "object" ||
+    (req.body.hasOwnProperty("id") && typeof req.body.id !== "number") ||
+    (req.body.hasOwnProperty("completion") && typeof req.body.completion !== "string") ||
+    (req.body.hasOwnProperty("score") && typeof req.body.score !== "number")
   ) {
     throw new Error("gameFieldTypeMismatch");
   }
 
+  // check for dupe IDs
+  const checkID = readGames().filter((game) => game.id == req.body.id);
+  if (checkID.length > 0) throw new Error("gameDupeID");
+
   let newGame = {
-    id: req.body.id || readGames().length, // idk if this works
+    id: req.body.id || readGames().length + 1,
     name: req.body.name,
     platforms: req.body.platforms,
     completion: req.body.completion || "Wishlist",
@@ -80,7 +83,6 @@ app.post("/api/games", (req, res) => {
 });
 
 app.delete("/api/games/:id", (req, res) => {
-  // delete an item
   const games = readGames();
   for (game of games) {
     if (game.id == req.params.id) {
@@ -97,20 +99,25 @@ app.use((err, req, res, next) => {
   // handle errors
   switch (err.message) {
     case "failedToFindGame": {
-      const msg = `Game with ID ${req.id} couldn't be found!`;
+      const msg = `Game with the requested ID couldn't be found!`;
       console.error(msg);
       res.status(400).send({ error: msg });
-      } break;
+    } break;
     case "gameReqFieldMissing": {
       const msg = `Request missing one of the following properties: name, platforms`;
       console.error(msg);
       res.status(400).send({ error: msg });
-      } break;
+    } break;
     case "gameFieldTypeMismatch": {
       const msg = `Request contains type errors`;
+      console.error(msg + `\n${req.body}`);
+      res.status(400).send({ error: msg });
+    } break;
+    case "gameDupeID": {
+      const msg = `Request provides an ID that already exists! To edit an entry, you must delete it first!`;
       console.error(msg);
       res.status(400).send({ error: msg });
-      } break;
+    } break;
     default:
       console.error(`An unhandled exception has occured of type ${err}`);
       res.status(500).send({ error: "An unhandled exception has occured!" });
@@ -131,15 +138,13 @@ function readGames() {
 }
 
 function writeGame(game) {
-  const gamesFile = readGames();
-  let gamesList = JSON.parse(gamesFile);
-  gamesList.append(game);
-  fs.writeFileSync("data.json", gamesFile);
+  let gamesList = readGames();
+  gamesList.push(game);
+  fs.writeFileSync("data.json", JSON.stringify(gamesList));
 }
 
-function deleteGame(game) {
-  const gamesFile = readGames();
-  let gamesList = JSON.parse(gamesFile);
-  gamesList = gamesList.filter(g => game !== g);
-  fs.writeFileSync("data.json", gamesFile);
+function deleteGame(id) {
+  let gamesList = readGames();
+  gamesList = gamesList.filter(g => id !== g.id);
+  fs.writeFileSync("data.json", JSON.stringify(gamesList));
 }
