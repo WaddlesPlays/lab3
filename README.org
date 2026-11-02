@@ -11,6 +11,6 @@ my lab 3 for CSCI3172, please remember to delete the GitHub later
 - [ ] payload validation
   - [ ] inspect incoming data to ensure required fields are met
   - [ ] reject invalid data safely, and ensure the user gets a meaningful error
-- [-] centralized error-handling block
-  - [ ] properly map application errors to status codes, ex. 400, 404, 500
+- [x] centralized error-handling block
+  - [x] properly map application errors to status codes, ex. 400, 404, 500
 

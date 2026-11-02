@@ -35,34 +35,46 @@ app.get("/api/items", (req, res) => {
   res.send(games);
 });
 
-app.get("/api/items/:g", (req, res) => {
+app.get("/api/items/:id", (req, res) => {
   // return the item with the game name
   const games = readGames();
   for (game of games) {
-    if (game == g) {
-      res.send(g);
+    if (game.id == id) {
+      res.send(id);
       return
     }
   }
-  throw new Error(`Failed to find game ${game}`);
+  throw new Error(`Failed to find game with id ${id}`);
 });
 
 app.post("/api/items", (req, res) => {
   // add an item
+  // make sure the data is valid first
 });
 
-app.delete("/api/items/:g", (req, res) => {
+app.delete("/api/items/:id", (req, res) => {
   // delete an item
+  const games = readGames();
+  for (game of games) {
+    if (game.id == id) {
+      deleteGame(id);
+      return
+    }
+  }
+  throw new Error(`Failed to find game with id ${id}`);
 });
 
 // error handling
 app.use((err, req, res, next) => {
   // handle errors
-  switch (err) {
-    // case Exception:
-    default:
+  switch (err.text) {
+    case "":
       console.log(`An unhandled exception has occured of type ${err}`);
       res.status(500).send({ error: "An unhandled exception has occured!" });
+      break;
+    default:
+      console.log(err.text);
+      res.status(400).send({ error: `${err.text}`})
   }
 });
 
@@ -77,9 +89,16 @@ function readGames() {
   return fs.readFileSync("data.json");
 }
 
-function writeGames(game) {
+function writeGame(game) {
   const gamesFile = readGames();
   let gamesList = JSON.parse(gamesFile);
   gamesList.append(game);
+  fs.writeFileSync("data.json", gamesFile);
+}
+
+function deleteGame(game) {
+  const gamesFile = readGames();
+  let gamesList = JSON.parse(gamesFile);
+  gamesList = gamesList.filter(g => game !== g);
   fs.writeFileSync("data.json", gamesFile);
 }
