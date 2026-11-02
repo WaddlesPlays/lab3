@@ -4,7 +4,6 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 app.use(cookieParser());
-app.use(express.json());
 const port = 3000;
 
 
@@ -22,6 +21,8 @@ app.get("/visit-count", (req, res) => {
 
 
 // actual lab 3 routes //
+// I think if this is here it'll only work from here on out? so the above should still work normally
+app.use(express.json());
 
 app.use((req, res, next) => {
   // log request
@@ -39,29 +40,57 @@ app.get("/api/items/:id", (req, res) => {
   // return the item with the game name
   const games = readGames();
   for (game of games) {
-    if (game.id == id) {
-      res.send(id);
+    if (game.id == req.params.id) {
+      res.send(game);
       return
     }
   }
-  throw new Error(`Failed to find game with id ${id}`);
+  throw new Error("failedToFindGame");
 });
 
 app.post("/api/items", (req, res) => {
   // add an item
-  // make sure the data is valid first
+  if (
+    !req.body.hasOwnProperty("name") ||
+    !req.body.hasOwnProperty("platforms")
+  ) {
+    throw new Error("gameReqFieldMissing");
+  }
+
+  if (
+    typeof req.body.name !== String ||
+    typeof req.body.platforms !== String ||
+    (req.body.hasOwnProperty("completion") && typeof req.body.completion !== Number) ||
+    (req.body.hasOwnProperty("completion") && typeof req.body.completion !== String) ||
+    (req.body.hasOwnProperty("score") && typeof req.body.score !== Number) ||
+  ) {
+    throw new Error("gameFieldTypeMismatch");
+  }
+
+
+  let newGame = {
+    id: req.body.id || readGames().length, // idk if this works
+    name: req.body.name,
+    platforms: req.body.platforms,
+    completion: req.body.completion || "Wishlist",
+    score: req.body.score || 0
+  };
+
+  writeGame(newGame);
+  res.send({ message: "Game successfully added" });
 });
 
 app.delete("/api/items/:id", (req, res) => {
   // delete an item
   const games = readGames();
   for (game of games) {
-    if (game.id == id) {
-      deleteGame(id);
+    if (game.id == req.params.id) {
+      deleteGame(req.params.id);
+      res.send({ message: "Game with id " + req.body.id + " successfully removed." });
       return
     }
   }
-  throw new Error(`Failed to find game with id ${id}`);
+  throw new Error("failedToFindGame");
 });
 
 // error handling
@@ -74,9 +103,11 @@ app.use((err, req, res, next) => {
       break;
     default:
       console.log(err.text);
-      res.status(400).send({ error: `${err.text}`})
+      res.status(400).send({ error: `${err.text}` })
   }
 });
+
+// no update is provided by the API, frontends are to delete the old entry and add a new one with the same id
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

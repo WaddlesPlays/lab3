@@ -5,12 +5,13 @@ my lab 3 for CSCI3172, please remember to delete the GitHub later
 * Requirements
 
 - [x] initialize a project
-- [-] REST endpoints
+- [x] REST endpoints
 - [x] handle JSON bodies
 - [x] logging middleware
-- [ ] payload validation
-  - [ ] inspect incoming data to ensure required fields are met
-  - [ ] reject invalid data safely, and ensure the user gets a meaningful error
+- [x] payload validation
+  - [x] inspect incoming data to ensure required fields are met
+  - [x] reject invalid data safely, and ensure the user gets a meaningful error
 - [x] centralized error-handling block
   - [x] properly map application errors to status codes, ex. 400, 404, 500
+- [ ] make sure everything actually works
 
