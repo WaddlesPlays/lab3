@@ -1,0 +1,9 @@
+[
+  {
+    id: 1,
+    game: "Big Walk",
+    platforms: ["Windows", "MacOS"],
+    completion: "Playing",
+    score: 10
+  }
+]

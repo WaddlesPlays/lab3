@@ -96,21 +96,21 @@ app.delete("/api/items/:id", (req, res) => {
 app.use((err, req, res, next) => {
   // handle errors
   switch (err.text) {
-    case "failedToFindGame":
+    case "failedToFindGame": {
       const msg = `Game with ID ${req.id} couldn't be found!`;
       console.error(msg);
       res.status(400).send({ error: msg });
-      break;
-    case "gameReqFieldMissing":
+      } break;
+    case "gameReqFieldMissing": {
       const msg = `Request missing one of the following properties: name, platforms`;
       console.error(msg);
       res.status(400).send({ error: msg });
-      break;
-    case "gameFieldTypeMismatch":
+      } break;
+    case "gameFieldTypeMismatch": {
       const msg = `Request contains type errors`;
       console.error(msg);
       res.status(400).send({ error: msg });
-      break;
+      } break;
     default:
       console.error(`An unhandled exception has occured of type ${err}`);
       res.status(500).send({ error: "An unhandled exception has occured!" });
