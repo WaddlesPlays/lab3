@@ -71,8 +71,9 @@ app.post("/api/games", (req, res) => {
   if (checkID.length > 0) throw new Error("gameDupeID");
 
   const games = readGames();
-  let newGame = {
-    id: req.body.id || games[games.length].id + 1, // DELETE will leave gaps!
+  debugger;
+  const newGame = {
+    id: req.body.id || games[games.length - 1].id + 1, // DELETE will leave gaps!
     name: req.body.name,
     platforms: req.body.platforms,
     completion: req.body.completion || "Wishlist",
