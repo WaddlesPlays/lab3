@@ -70,8 +70,9 @@ app.post("/api/games", (req, res) => {
   const checkID = readGames().filter((game) => game.id == req.body.id);
   if (checkID.length > 0) throw new Error("gameDupeID");
 
+  const games = readGames();
   let newGame = {
-    id: req.body.id || readGames().length + 1,
+    id: req.body.id || games[games.length].id + 1, // DELETE will leave gaps!
     name: req.body.name,
     platforms: req.body.platforms,
     completion: req.body.completion || "Wishlist",
@@ -87,7 +88,7 @@ app.delete("/api/games/:id", (req, res) => {
   for (game of games) {
     if (game.id == req.params.id) {
       deleteGame(req.params.id);
-      res.send({ message: "Game with id " + req.body.id + " successfully removed." });
+      res.send({ message: "Game with id " + req.params.id + " successfully removed." });
       return
     }
   }
@@ -144,7 +145,7 @@ function writeGame(game) {
 }
 
 function deleteGame(id) {
-  let gamesList = readGames();
-  gamesList = gamesList.filter(g => id !== g.id);
-  fs.writeFileSync("data.json", JSON.stringify(gamesList));
+  const gamesList = readGames();
+  const newList = gamesList.filter(g => g.id != id);
+  fs.writeFileSync("data.json", JSON.stringify(newList));
 }
